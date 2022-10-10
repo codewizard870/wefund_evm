@@ -4,12 +4,200 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "enum WeFund.TokenType",
+        "name": "token",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Backed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "CommunityAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "CommunityRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "voted",
+        "type": "bool"
+      }
+    ],
+    "name": "DocumentValuationVoted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "IncubationGoalAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "voted",
+        "type": "bool"
+      }
+    ],
+    "name": "IncubationGoalSetupVoted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "voted",
+        "type": "bool"
+      }
+    ],
+    "name": "IncubationGoalVoted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "uint8",
         "name": "version",
         "type": "uint8"
       }
     ],
     "name": "Initialized",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "voted",
+        "type": "bool"
+      }
+    ],
+    "name": "IntroCallVoted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "MilestoneAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "voted",
+        "type": "bool"
+      }
+    ],
+    "name": "MilestoneReleaseVoted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "voted",
+        "type": "bool"
+      }
+    ],
+    "name": "MilestoneSetupVoted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "NextIncubationGoalVoting",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "NextMilestoneReleaseVoting",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "NextMilestoneSetupVoting",
     "type": "event"
   },
   {
@@ -35,7 +223,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "pid",
         "type": "uint256"
@@ -48,27 +236,38 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "addr",
-        "type": "address"
+        "indexed": false,
+        "internalType": "enum WeFund.ProjectStatus",
+        "name": "status",
+        "type": "uint8"
       }
     ],
-    "name": "WhitelistAdded",
+    "name": "ProjectStatusChanged",
     "type": "event"
   },
   {
-    "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
-        "name": "addr",
+        "name": "_addr",
         "type": "address"
       }
     ],
-    "name": "WhitelistRemoved",
-    "type": "event"
+    "name": "_getBackerIndex",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [
@@ -79,6 +278,86 @@
       }
     ],
     "name": "addCommunity",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "goal",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct WeFund.IncubationGoalInfo",
+        "name": "_info",
+        "type": "tuple"
+      }
+    ],
+    "name": "addIncubationGoal",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "step",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "start_date",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "end_date",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "status",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct WeFund.MilestoneInfo",
+        "name": "_info",
+        "type": "tuple"
+      }
+    ],
+    "name": "addMilestone",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -126,14 +405,9 @@
             "internalType": "string",
             "name": "status",
             "type": "string"
-          },
-          {
-            "internalType": "string[]",
-            "name": "votes",
-            "type": "string[]"
           }
         ],
-        "internalType": "struct WeFund.Milestone[]",
+        "internalType": "struct WeFund.MilestoneInfo[]",
         "name": "_milestone",
         "type": "tuple[]"
       }
@@ -151,27 +425,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
-        "name": "tier",
-        "type": "uint256"
-      }
-    ],
-    "name": "addWhitelist",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "pid",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
+        "internalType": "enum WeFund.TokenType",
         "name": "token_type",
-        "type": "uint256"
+        "type": "uint8"
       },
       {
         "internalType": "uint256",
@@ -188,13 +444,44 @@
     "inputs": [
       {
         "internalType": "bytes32",
-        "name": "c__0x6a54e05a",
+        "name": "c__0x4ed6348e",
         "type": "bytes32"
       }
     ],
-    "name": "c_0x6a54e05a",
+    "name": "c_0x4ed6348e",
     "outputs": [],
     "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "vote",
+        "type": "bool"
+      }
+    ],
+    "name": "documentValuationVote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getCommunity",
+    "outputs": [
+      {
+        "internalType": "address[]",
+        "name": "",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -222,31 +509,46 @@
             "type": "uint256"
           },
           {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
             "internalType": "uint256",
             "name": "collected",
             "type": "uint256"
           },
           {
+            "internalType": "uint256",
+            "name": "backed",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum WeFund.ProjectStatus",
+            "name": "status",
+            "type": "uint8"
+          },
+          {
             "components": [
               {
-                "internalType": "address",
-                "name": "addr",
-                "type": "address"
-              },
-              {
-                "internalType": "uint256",
-                "name": "tier",
-                "type": "uint256"
+                "internalType": "string",
+                "name": "goal",
+                "type": "string"
               }
             ],
-            "internalType": "struct WeFund.WhitelistInfo[]",
-            "name": "whitelist",
+            "internalType": "struct WeFund.IncubationGoalInfo[]",
+            "name": "incubationGoals",
             "type": "tuple[]"
           },
           {
             "internalType": "uint256",
-            "name": "backed",
+            "name": "incubationGoalVoteIndex",
             "type": "uint256"
+          },
+          {
+            "internalType": "address[]",
+            "name": "wefundVotes",
+            "type": "address[]"
           },
           {
             "components": [
@@ -311,16 +613,21 @@
                 "internalType": "string",
                 "name": "status",
                 "type": "string"
-              },
-              {
-                "internalType": "string[]",
-                "name": "votes",
-                "type": "string[]"
               }
             ],
-            "internalType": "struct WeFund.Milestone[]",
+            "internalType": "struct WeFund.MilestoneInfo[]",
             "name": "milestones",
             "type": "tuple[]"
+          },
+          {
+            "internalType": "address[]",
+            "name": "backerVotes",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint256",
+            "name": "milestoneVotesIndex",
+            "type": "uint256"
           }
         ],
         "internalType": "struct WeFund.ProjectInfo[]",
@@ -332,8 +639,98 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "vote",
+        "type": "bool"
+      }
+    ],
+    "name": "incubationGoalSetupVote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "vote",
+        "type": "bool"
+      }
+    ],
+    "name": "incubationGoalVote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "initialize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "vote",
+        "type": "bool"
+      }
+    ],
+    "name": "introCallVote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "vote",
+        "type": "bool"
+      }
+    ],
+    "name": "milestoneReleaseVote",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "vote",
+        "type": "bool"
+      }
+    ],
+    "name": "milestoneSetupVote",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -352,56 +749,14 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "project_id",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
       }
     ],
-    "name": "projects",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "id",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "collected",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "backed",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "pid",
-        "type": "uint256"
-      }
-    ],
-    "name": "removeWhitelist",
+    "name": "removeCommunity",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -432,6 +787,19 @@
       }
     ],
     "name": "setTokenAddress",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addr",
+        "type": "address"
+      }
+    ],
+    "name": "setWefundwallet",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

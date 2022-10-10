@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "../node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "../node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
-// import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+// import "../node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+// import "../node_modules/@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+// import "../node_modules/@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+// import "../node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
 //bsc testnet
 // address constant USDC = 0x686c626E48bfC5DC98a30a9992897766fed4Abd3;
@@ -19,14 +22,25 @@ import "../node_modules/@openzeppelin/contracts-upgradeable/access/OwnableUpgrad
 // address constant USDT = 0x55d398326f99059ff775485246999027b3197955;
 // address constant BUSD = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
 
+//rinkeby
+// address USDC = 0x686c626E48bfC5DC98a30a9992897766fed4Abd3;
+// address USDT = 0x6EE856Ae55B6E1A249f04cd3b947141bc146273c;
+// address BUSD = 0x16c550a97Ad2ae12C0C8CF1CC3f8DB4e0c45238f;
+// address WEFUND_WALLET = 0x0dC488021475739820271D595a624892264Ca641;
+
 contract WeFund is Initializable, OwnableUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
-    // AggregatorV3Interface internal priceFeed;
-    //rinkeby
-    address USDC = 0xFE724a829fdF12F7012365dB98730EEe33742ea2;
-    address USDT = 0x6EE856Ae55B6E1A249f04cd3b947141bc146273c;
-    address BUSD = 0x16c550a97Ad2ae12C0C8CF1CC3f8DB4e0c45238f;
-    address WEFUND_WALLET = 0x0dC488021475739820271D595a624892264Ca641;
+
+    address USDC;
+    address USDT;
+    address BUSD;
+    address WEFUND_WALLET;
+
+    enum TokenType {
+        USDC,
+        USDT,
+        BUSD
+    }
 
     enum ProjectStatus {
         DocumentValuation,
@@ -78,9 +92,22 @@ contract WeFund is Initializable, OwnableUpgradeable {
     uint256 private project_id;
     address[] private community;
 
-    event WhitelistAdded(address indexed addr);
-    event WhitelistRemoved(address indexed addr);
-    event ProjectAdded(uint256 indexed pid);
+    event CommunityAdded(uint256 length);
+    event CommunityRemoved(uint256 length);
+    event ProjectAdded(uint256 pid);
+    event DocumentValuationVoted(bool voted);
+    event ProjectStatusChanged(ProjectStatus status);
+    event IntroCallVoted(bool voted);
+    event IncubationGoalSetupVoted(bool voted);
+    event IncubationGoalAdded(uint256 length);
+    event IncubationGoalVoted(bool voted);
+    event NextIncubationGoalVoting(uint256 index);
+    event MilestoneAdded(uint256 length);
+    event MilestoneSetupVoted(bool voted);
+    event NextMilestoneSetupVoting(uint256 index);
+    event Backed(TokenType token, uint256 amount);
+    event MilestoneReleaseVoted(bool voted);
+    event NextMilestoneReleaseVoting(uint256 index);
 
     function initialize() public initializer {
         project_id = 1;
@@ -97,6 +124,10 @@ contract WeFund is Initializable, OwnableUpgradeable {
         BUSD = _busd;
     }
 
+    function setWefundwallet(address _addr) public onlyOwner {
+        WEFUND_WALLET = _addr;
+    }
+
     function addCommunity(address _addr) public {
         for (uint256 i = 0; i < community.length; i++) {
             if (community[i] == _addr) {
@@ -104,6 +135,7 @@ contract WeFund is Initializable, OwnableUpgradeable {
             }
         }
         community.push(_addr);
+        emit CommunityAdded(community.length);
     }
 
     function removeCommunity(address _addr) public {
@@ -114,6 +146,7 @@ contract WeFund is Initializable, OwnableUpgradeable {
                 community.pop();
             }
         }
+        emit CommunityRemoved(community.length);
     }
 
     function addProject(uint256 _collected, MilestoneInfo[] calldata _milestone) public {
@@ -198,7 +231,9 @@ contract WeFund is Initializable, OwnableUpgradeable {
             ProjectInfo storage project = projects[pid];
             delete project.wefundVotes;
             project.status = ProjectStatus.IntroCall;
+            emit ProjectStatusChanged(ProjectStatus.IntroCall);
         }
+        emit DocumentValuationVoted(vote);
     }
 
     function introCallVote(uint256 pid, bool vote) public onlyWefund checkStatus(pid, ProjectStatus.IntroCall) {
@@ -207,7 +242,9 @@ contract WeFund is Initializable, OwnableUpgradeable {
             ProjectInfo storage project = projects[pid];
             delete project.wefundVotes;
             project.status = ProjectStatus.IncubationGoalSetup;
+            emit ProjectStatusChanged(ProjectStatus.IncubationGoalSetup);
         }
+        emit IntroCallVoted(vote);
     }
 
     function incubationGoalSetupVote(uint256 pid, bool vote)
@@ -220,12 +257,15 @@ contract WeFund is Initializable, OwnableUpgradeable {
             ProjectInfo storage project = projects[pid];
             delete project.wefundVotes;
             project.status = ProjectStatus.IncubationGoal;
+            emit ProjectStatusChanged(ProjectStatus.IncubationGoal);
         }
+        emit IncubationGoalSetupVoted(vote);
     }
 
     function addIncubationGoal(uint256 pid, IncubationGoalInfo calldata _info) public onlyProjectOwner(pid) {
         ProjectInfo storage project = projects[pid];
         project.incubationGoals.push(_info);
+        emit IncubationGoalAdded(project.incubationGoals.length);
     }
 
     function incubationGoalVote(uint256 pid, bool vote)
@@ -239,10 +279,19 @@ contract WeFund is Initializable, OwnableUpgradeable {
             delete project.wefundVotes;
             if (project.incubationGoalVoteIndex < project.incubationGoals.length - 1) {
                 project.incubationGoalVoteIndex++;
+                emit NextIncubationGoalVoting(project.incubationGoalVoteIndex);
             } else {
                 project.status = ProjectStatus.MilestoneSetup;
+                emit ProjectStatusChanged(ProjectStatus.MilestoneSetup);
             }
         }
+        emit IncubationGoalVoted(vote);
+    }
+
+    function addMilestone(uint256 pid, MilestoneInfo calldata _info) public onlyProjectOwner(pid) {
+        ProjectInfo storage project = projects[pid];
+        project.milestones.push(_info);
+        emit MilestoneAdded(project.milestones.length);
     }
 
     function milestoneSetupVote(uint256 pid, bool vote)
@@ -256,15 +305,19 @@ contract WeFund is Initializable, OwnableUpgradeable {
             delete project.wefundVotes;
             if (project.milestoneVotesIndex < project.milestones.length - 1) {
                 project.milestoneVotesIndex++;
+                emit NextMilestoneSetupVoting(project.milestoneVotesIndex);
             } else {
+                project.milestoneVotesIndex = 0;
                 project.status = ProjectStatus.CrowdFundraising;
+                emit ProjectStatusChanged(ProjectStatus.CrowdFundraising);
             }
         }
+        emit MilestoneSetupVoted(vote);
     }
 
     function back(
         uint256 pid,
-        uint256 token_type,
+        TokenType token_type,
         uint256 amount
     ) public checkStatus(pid, ProjectStatus.CrowdFundraising) {
         address sender = msg.sender;
@@ -274,16 +327,16 @@ contract WeFund is Initializable, OwnableUpgradeable {
         uint256 a_usdt = 0;
         uint256 a_busd = 0;
 
-        if (token_type == 0) {
+        // if (token_type == TokenType.USDC) {
             token = IERC20Upgradeable(USDC);
             a_usdc = amount;
-        } else if (token_type == 1) {
-            token = IERC20Upgradeable(USDT);
-            a_usdt = amount;
-        } else {
-            token = IERC20Upgradeable(BUSD);
-            a_busd = amount;
-        }
+        // } else if (token_type == TokenType.USDT) {
+        //     token = IERC20Upgradeable(USDT);
+        //     a_usdt = amount;
+        // } else {
+        //     token = IERC20Upgradeable(BUSD);
+        //     a_busd = amount;
+        // }
 
         token.transferFrom(sender, WEFUND_WALLET, amount);
 
@@ -307,10 +360,13 @@ contract WeFund is Initializable, OwnableUpgradeable {
         }
         if (project.backed >= project.collected) {
             project.status = ProjectStatus.MilestoneRelease;
+            emit ProjectStatusChanged(ProjectStatus.MilestoneRelease);
         }
+
+        emit Backed(token_type, amount);
     }
 
-    function _getBackerIndex(uint256 pid, address _addr) internal view returns (uint8) {
+    function _getBackerIndex(uint256 pid, address _addr) public view returns (uint8) {
         ProjectInfo memory project = projects[pid];
         for (uint8 i = 0; i < project.backers.length; i++) {
             if (project.backers[i].addr == _addr) {
@@ -373,7 +429,7 @@ contract WeFund is Initializable, OwnableUpgradeable {
             delete project.backerVotes;
             if (project.milestoneVotesIndex < project.milestones.length - 1) {
                 IERC20Upgradeable token;
-                token = IERC20Upgradeable(BUSD);
+                token = IERC20Upgradeable(USDC);
 
                 token.transferFrom(
                     WEFUND_WALLET,
@@ -382,10 +438,13 @@ contract WeFund is Initializable, OwnableUpgradeable {
                 );
 
                 project.milestoneVotesIndex++;
+                emit NextMilestoneReleaseVoting(project.milestoneVotesIndex);
             } else {
                 project.status = ProjectStatus.Completed;
+                emit ProjectStatusChanged(ProjectStatus.Completed);
             }
         }
+        emit MilestoneReleaseVoted(vote);
     }
 
     function getCommunity() public view returns (address[] memory) {
@@ -393,7 +452,7 @@ contract WeFund is Initializable, OwnableUpgradeable {
     }
 
     function getNumberOfProjects() public view returns (uint256) {
-        return project_id;
+        return project_id-1;
     }
 
     function getProjectInfo() public view returns (ProjectInfo[] memory) {

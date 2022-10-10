@@ -26,6 +26,7 @@ const config: HardhatUserConfig = {
     hardhat: {
       gas: 120000000,
       blockGasLimit: 0x1fffffffffffff,
+      allowUnlimitedContractSize : true
     },
     // testnet: bscTestnet,
     // mainnet: bscMainnet,
