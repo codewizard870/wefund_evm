@@ -11,13 +11,13 @@ import "dotenv/config";
 const bscTestnet: NetworkUserConfig = {
   url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
   chainId: 97,
-  accounts: [process.env.KEY_TESTNET!],
+  accounts: [process.env.PK!],
 };
 
 const bscMainnet: NetworkUserConfig = {
   url: "https://bsc-dataseed.binance.org/",
   chainId: 56,
-  accounts: [process.env.KEY_MAINNET!],
+  accounts: [process.env.PK!],
 };
 
 const config: HardhatUserConfig = {
@@ -28,16 +28,43 @@ const config: HardhatUserConfig = {
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize : true
     },
-    // testnet: bscTestnet,
+    testnet: bscTestnet,
     // mainnet: bscMainnet,
   },
   solidity: {
+    // compilers: [
+    //   {
+    //     version: '0.8.9',
+    //   },
+    //   {
+    //     version: '0.8.4',
+    //   },
+    //   {
+    //     version: '0.8.2',
+    //   },
+    //   {
+    //     version: '0.8.0',
+    //   },
+    //   {
+    //     version: '0.6.2',
+    //   },
+    //   {
+    //     version: '0.6.0',
+    //   },
+    // ],
     version: "0.8.4",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 99999,
-      },
+        runs: 200,
+        // details: {
+        //   yul: true,
+        //   yulDetails: {
+        //     stackAllocation: true,
+        //     optimizerSteps: "dhfoDgvulfnTUtnIf"
+        //   }
+        // }
+      }
     },
   },
   paths: {

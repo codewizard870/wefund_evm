@@ -1,7 +1,7 @@
 import { ethers, network } from "hardhat";
-import config from "../config";
 
 const currentNetwork = network.name;
+console.log(currentNetwork);
 
 const main = async () => {
   const WeFund = await ethers.getContractFactory("WeFund");
@@ -10,12 +10,6 @@ const main = async () => {
 
   await wefund.deployed();
   console.log("WeFund deployed to:", wefund.address);
-
-  await wefund.intiialize();
-
-  if (currentNetwork == "testnet") {
-  } else if (currentNetwork == "mainnet") {
-  }
 };
 
 main()

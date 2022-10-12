@@ -22,13 +22,6 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   // VARIABLES
   const _totalInitSupply = parseEther("10000");
 
-  // let _lengthLottery = new BN("14400"); // 4h
-  // const _priceTicketInCake = parseEther("0.5");
-  // let _discountDivisor = "2000";
-
-  // let _rewardsBreakdown = ["200", "300", "500", "1500", "2500", "5000"];
-  // let _treasuryFee = "2000";
-
   // Contracts
   let wefund;
   let mockUSDC;
@@ -58,7 +51,6 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     // Deploy PancakeSwapLottery
     wefund = await WeFund.new({ from: alice });
 
-    await wefund.initialize();
     await wefund.setTokenAddress(mockUSDC.address, mockUSDT.address, mockBUSD.address);
     await wefund.setWefundwallet(treasury);
 

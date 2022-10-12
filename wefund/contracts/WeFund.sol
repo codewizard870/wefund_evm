@@ -1,36 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-//bsc testnet
-// address constant USDC = 0x686c626E48bfC5DC98a30a9992897766fed4Abd3;
-// address constant USDT = 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd;
-// address constant BUSD = 0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee;
-// address constant WEFUND_WALLET = 0x0dC488021475739820271D595a624892264Ca641;
-
-//bsc mainnet
-// address constant USDC = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;
-// address constant USDT = 0x55d398326f99059ff775485246999027b3197955;
-// address constant BUSD = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
-
-//rinkeby
-// address USDC = 0x686c626E48bfC5DC98a30a9992897766fed4Abd3;
-// address USDT = 0x6EE856Ae55B6E1A249f04cd3b947141bc146273c;
-// address BUSD = 0x16c550a97Ad2ae12C0C8CF1CC3f8DB4e0c45238f;
-// address WEFUND_WALLET = 0x0dC488021475739820271D595a624892264Ca641;
-
-contract WeFund is Initializable, OwnableUpgradeable {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
-
-    address USDC;
-    address USDT;
-    address BUSD;
-    address WEFUND_WALLET;
-
+contract WeFund {
     enum TokenType {
         USDC,
         USDT,
@@ -83,9 +56,6 @@ contract WeFund is Initializable, OwnableUpgradeable {
         address[] backerVotes;
         uint256 milestoneVotesIndex;
     }
-    mapping(uint256 => ProjectInfo) private projects;
-    uint256 private project_id;
-    address[] private community;
 
     event CommunityAdded(uint256 length);
     event CommunityRemoved(uint256 length);
@@ -104,22 +74,30 @@ contract WeFund is Initializable, OwnableUpgradeable {
     event MilestoneReleaseVoted(bool voted);
     event NextMilestoneReleaseVoting(uint256 index);
 
-    function initialize() public initializer {
+    address USDC;
+    address USDT;
+    address BUSD;
+    address WEFUND_WALLET;
+
+    mapping(uint256 => ProjectInfo) private projects;
+    uint256 private project_id;
+    address[] private community;
+
+    constructor() {
         project_id = 1;
-        __Ownable_init();
     }
 
     function setTokenAddress(
         address _usdc,
         address _usdt,
         address _busd
-    ) public onlyOwner {
+    ) public {
         USDC = _usdc;
         USDT = _usdt;
         BUSD = _busd;
     }
 
-    function setWefundwallet(address _addr) public onlyOwner {
+    function setWefundwallet(address _addr) public {
         WEFUND_WALLET = _addr;
     }
 
@@ -174,24 +152,21 @@ contract WeFund is Initializable, OwnableUpgradeable {
         return type(uint8).max;
     }
 
-    modifier onlyWefund() {
+    function _onlyWeFund() internal view {
         require(_getWefundWalletIndex(msg.sender) != type(uint8).max, "Only Wefund Wallet");
-        _;
     }
 
-    modifier onlyProjectOwner(uint256 pid) {
-        ProjectInfo memory project = projects[pid];
-        require(project.owner == msg.sender, "Only Project Owner");
-        _;
+    function _onlyProjectOwner(uint256 pid) internal view {
+        require(projects[pid].owner == msg.sender, "Only Project Owner");
     }
 
-    modifier checkStatus(uint256 pid, ProjectStatus status) {
-        ProjectInfo memory project = projects[pid];
-        require(project.status == status, "Project Status is invalid");
-        _;
+    function _checkStatus(uint256 pid, ProjectStatus status) internal view {
+        require(projects[pid].status == status, "Project Status is invalid");
     }
 
     function _wefundVote(uint256 pid, bool vote) internal {
+        _onlyWeFund();
+
         ProjectInfo storage project = projects[pid];
         uint8 index = _getWefundVoteIndex(pid, msg.sender);
         if (index != type(uint8).max) {
@@ -216,11 +191,8 @@ contract WeFund is Initializable, OwnableUpgradeable {
         return true;
     }
 
-    function documentValuationVote(uint256 pid, bool vote)
-        public
-        onlyWefund
-        checkStatus(pid, ProjectStatus.DocumentValuation)
-    {
+    function documentValuationVote(uint256 pid, bool vote) public {
+        _checkStatus(pid, ProjectStatus.DocumentValuation);
         _wefundVote(pid, vote);
         if (_isWefundAllVoted(pid) == true) {
             ProjectInfo storage project = projects[pid];
@@ -231,7 +203,8 @@ contract WeFund is Initializable, OwnableUpgradeable {
         emit DocumentValuationVoted(vote);
     }
 
-    function introCallVote(uint256 pid, bool vote) public onlyWefund checkStatus(pid, ProjectStatus.IntroCall) {
+    function introCallVote(uint256 pid, bool vote) public {
+        _checkStatus(pid, ProjectStatus.IntroCall);
         _wefundVote(pid, vote);
         if (_isWefundAllVoted(pid) == true) {
             ProjectInfo storage project = projects[pid];
@@ -242,11 +215,8 @@ contract WeFund is Initializable, OwnableUpgradeable {
         emit IntroCallVoted(vote);
     }
 
-    function incubationGoalSetupVote(uint256 pid, bool vote)
-        public
-        onlyWefund
-        checkStatus(pid, ProjectStatus.IncubationGoalSetup)
-    {
+    function incubationGoalSetupVote(uint256 pid, bool vote) public {
+        _checkStatus(pid, ProjectStatus.IncubationGoalSetup);
         _wefundVote(pid, vote);
         if (_isWefundAllVoted(pid) == true) {
             ProjectInfo storage project = projects[pid];
@@ -257,17 +227,15 @@ contract WeFund is Initializable, OwnableUpgradeable {
         emit IncubationGoalSetupVoted(vote);
     }
 
-    function addIncubationGoal(uint256 pid, IncubationGoalInfo calldata _info) public onlyProjectOwner(pid) {
+    function addIncubationGoal(uint256 pid, IncubationGoalInfo calldata _info) public {
+        _onlyProjectOwner(pid);
         ProjectInfo storage project = projects[pid];
         project.incubationGoals.push(_info);
         emit IncubationGoalAdded(project.incubationGoals.length);
     }
 
-    function incubationGoalVote(uint256 pid, bool vote)
-        public
-        onlyWefund
-        checkStatus(pid, ProjectStatus.IncubationGoal)
-    {
+    function incubationGoalVote(uint256 pid, bool vote) public {
+        _checkStatus(pid, ProjectStatus.IncubationGoal);
         _wefundVote(pid, vote);
         if (_isWefundAllVoted(pid) == true) {
             ProjectInfo storage project = projects[pid];
@@ -283,17 +251,15 @@ contract WeFund is Initializable, OwnableUpgradeable {
         emit IncubationGoalVoted(vote);
     }
 
-    function addMilestone(uint256 pid, MilestoneInfo calldata _info) public onlyProjectOwner(pid) {
+    function addMilestone(uint256 pid, MilestoneInfo calldata _info) public {
+        _onlyProjectOwner(pid);
         ProjectInfo storage project = projects[pid];
         project.milestones.push(_info);
         emit MilestoneAdded(project.milestones.length);
     }
 
-    function milestoneSetupVote(uint256 pid, bool vote)
-        public
-        onlyWefund
-        checkStatus(pid, ProjectStatus.MilestoneSetup)
-    {
+    function milestoneSetupVote(uint256 pid, bool vote) public {
+        _checkStatus(pid, ProjectStatus.MilestoneSetup);
         _wefundVote(pid, vote);
         if (_isWefundAllVoted(pid) == true) {
             ProjectInfo storage project = projects[pid];
@@ -314,24 +280,26 @@ contract WeFund is Initializable, OwnableUpgradeable {
         uint256 pid,
         TokenType token_type,
         uint256 amount
-    ) public checkStatus(pid, ProjectStatus.CrowdFundraising) {
+    ) public {
+        _checkStatus(pid, ProjectStatus.CrowdFundraising);
+
         address sender = msg.sender;
 
-        IERC20Upgradeable token;
+        IERC20 token;
         uint256 a_usdc = 0;
         uint256 a_usdt = 0;
         uint256 a_busd = 0;
 
-        // if (token_type == TokenType.USDC) {
-            token = IERC20Upgradeable(USDC);
+        if (token_type == TokenType.USDC) {
+            token = IERC20(USDC);
             a_usdc = amount;
-        // } else if (token_type == TokenType.USDT) {
-        //     token = IERC20Upgradeable(USDT);
-        //     a_usdt = amount;
-        // } else {
-        //     token = IERC20Upgradeable(BUSD);
-        //     a_busd = amount;
-        // }
+        } else if (token_type == TokenType.USDT) {
+            token = IERC20(USDT);
+            a_usdt = amount;
+        } else {
+            token = IERC20(BUSD);
+            a_busd = amount;
+        }
 
         token.transferFrom(sender, WEFUND_WALLET, amount);
 
@@ -413,18 +381,15 @@ contract WeFund is Initializable, OwnableUpgradeable {
         return true;
     }
 
-    function milestoneReleaseVote(uint256 pid, bool vote)
-        public
-        onlyBacker(pid)
-        checkStatus(pid, ProjectStatus.MilestoneRelease)
-    {
+    function milestoneReleaseVote(uint256 pid, bool vote) public onlyBacker(pid) {
+        _checkStatus(pid, ProjectStatus.MilestoneRelease);
         _backerVote(pid, vote);
         if (_isBackerAllVoted(pid) == true) {
             ProjectInfo storage project = projects[pid];
             delete project.backerVotes;
             if (project.milestoneVotesIndex < project.milestones.length - 1) {
-                IERC20Upgradeable token;
-                token = IERC20Upgradeable(USDC);
+                IERC20 token;
+                token = IERC20(USDC);
 
                 token.transferFrom(
                     WEFUND_WALLET,
@@ -447,7 +412,7 @@ contract WeFund is Initializable, OwnableUpgradeable {
     }
 
     function getNumberOfProjects() public view returns (uint256) {
-        return project_id-1;
+        return project_id - 1;
     }
 
     function getProjectInfo() public view returns (ProjectInfo[] memory) {
