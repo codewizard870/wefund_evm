@@ -48,11 +48,9 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     mockUSDT = await MockERC20.new("USDT", "USDT", _totalInitSupply);
     mockBUSD = await MockERC20.new("BUSD", "BUSD", _totalInitSupply);
 
-    // Deploy PancakeSwapLottery
     wefund = await WeFund.new({ from: alice });
 
-    await wefund.setTokenAddress(mockUSDC.address, mockUSDT.address, mockBUSD.address);
-    await wefund.setWefundwallet(treasury);
+    await wefund.setAddress(mockUSDC.address, mockUSDT.address, mockBUSD.address, treasury);
 
     mockUSDC.mintTokens(100_000_000_000, { from: erin });
     mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
@@ -79,7 +77,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
       length: "2",
     });
 
-    expectRevert(wefund.addCommunity(alice), "already registered");
+    expectRevert(wefund.addCommunity(alice), "Already Registered");
 
     result = await wefund.addCommunity(carol);
     expectEvent(result, "CommunityAdded", {
@@ -91,18 +89,25 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
       length: "2",
     });
   });
+
   it("Project Add", async () => {
-    result = await wefund.addProject(100_000_000, [], { from: carol });
+    result = await wefund.addProject(100_000_000, { from: carol });
     expectEvent(result, "ProjectAdded", {
       pid: "2",
     });
-    result = await wefund.addProject(200_000_000, [], { from: david });
+    result = await wefund.addProject(200_000_000, { from: david });
     expectEvent(result, "ProjectAdded", {
       pid: "3",
     });
+
+    result = await wefund.addProjectByOwner(200_000_000, "5", [], { from: alice });
+    expectEvent(result, "ProjectAdded", {
+      pid: "4",
+    });
   });
+
   it("Document Valuation Vote", async () => {
-    expectRevert(wefund.documentValuationVote("1", true, { from: carol }), "Only Wefund Wallet");
+    expectRevert(wefund.documentValuationVote("1", true, { from: carol }), "Only Wefund");
 
     result = await wefund.documentValuationVote("1", true, { from: alice });
     expectEvent(result, "DocumentValuationVoted", {
@@ -119,7 +124,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
       status: "1",
     });
 
-    expectRevert(wefund.documentValuationVote("1", true, { from: bob }), "Project Status is invalid");
+    expectRevert(wefund.documentValuationVote("1", true, { from: bob }), "Invalid Project Status");
   });
 
   it("Intro Call Vote", async () => {
@@ -257,7 +262,6 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
       amount: backedBUSD.toString(),
     });
 
-
     result = await wefund.back("1", "1", backedUSDT, { from: operator });
     expectEvent(result, "Backed", {
       token: "1",
@@ -317,7 +321,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
   it("Project", async () => {
     result = await wefund.getNumberOfProjects();
-    assert.equal(result, "2");
+    assert.equal(result, "3");
 
     result = await wefund.getProjectInfo();
     assert.equal(result[0].backed, backedUSDC + backedUSDT + backedBUSD);

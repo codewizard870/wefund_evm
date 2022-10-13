@@ -2,8 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract WeFund {
+contract WeFund is Ownable {
     enum TokenType {
         USDC,
         USDT,
@@ -87,47 +88,57 @@ contract WeFund {
         project_id = 1;
     }
 
-    function setTokenAddress(
+    function setAddress(
         address _usdc,
         address _usdt,
-        address _busd
-    ) public {
+        address _busd,
+        address _wefund
+    ) public onlyOwner {
         USDC = _usdc;
         USDT = _usdt;
         BUSD = _busd;
+        WEFUND_WALLET = _wefund;
     }
 
-    function setWefundwallet(address _addr) public {
-        WEFUND_WALLET = _addr;
-    }
-
-    function addCommunity(address _addr) public {
+    function addCommunity(address _addr) public onlyOwner {
         for (uint256 i = 0; i < community.length; i++) {
-            if (community[i] == _addr) {
-                revert("already registered");
-            }
+            if (community[i] == _addr) revert("Already Registered");
         }
         community.push(_addr);
         emit CommunityAdded(community.length);
     }
 
-    function removeCommunity(address _addr) public {
-        uint256 length = community.length;
-        for (uint256 i = 0; i < length; i++) {
+    function removeCommunity(address _addr) public onlyOwner {
+        for (uint256 i = 0; i < community.length; i++)
             if (community[i] == _addr) {
-                community[i] = community[length - 1];
+                community[i] = community[community.length - 1];
                 community.pop();
             }
-        }
+
         emit CommunityRemoved(community.length);
     }
 
-    function addProject(uint256 _collected, MilestoneInfo[] calldata _milestone) public {
+    function addProjectByOwner(
+        uint256 _collected,
+        ProjectStatus _status,
+        MilestoneInfo[] calldata _milestone
+    ) public onlyOwner {
         ProjectInfo storage project = projects[project_id];
         project.id = project_id;
         project.owner = msg.sender;
         project.collected = _collected;
+        project.status = _status;
         for (uint8 i = 0; i < _milestone.length; i++) project.milestones.push(_milestone[i]);
+        project_id++;
+
+        emit ProjectAdded(project_id);
+    }
+
+    function addProject(uint256 _collected) public {
+        ProjectInfo storage project = projects[project_id];
+        project.id = project_id;
+        project.owner = msg.sender;
+        project.collected = _collected;
         project_id++;
 
         emit ProjectAdded(project_id);
@@ -143,9 +154,8 @@ contract WeFund {
     }
 
     function _getWefundVoteIndex(uint256 pid, address _addr) internal view returns (uint8) {
-        ProjectInfo memory project = projects[pid];
-        for (uint8 i = 0; i < project.wefundVotes.length; i++) {
-            if (project.wefundVotes[i] == _addr) {
+        for (uint8 i = 0; i < projects[pid].wefundVotes.length; i++) {
+            if (projects[pid].wefundVotes[i] == _addr) {
                 return i;
             }
         }
@@ -153,7 +163,7 @@ contract WeFund {
     }
 
     function _onlyWeFund() internal view {
-        require(_getWefundWalletIndex(msg.sender) != type(uint8).max, "Only Wefund Wallet");
+        require(_getWefundWalletIndex(msg.sender) != type(uint8).max, "Only Wefund");
     }
 
     function _onlyProjectOwner(uint256 pid) internal view {
@@ -161,7 +171,7 @@ contract WeFund {
     }
 
     function _checkStatus(uint256 pid, ProjectStatus status) internal view {
-        require(projects[pid].status == status, "Project Status is invalid");
+        require(projects[pid].status == status, "Invalid Project Status");
     }
 
     function _wefundVote(uint256 pid, bool vote) internal {
@@ -183,11 +193,8 @@ contract WeFund {
     }
 
     function _isWefundAllVoted(uint256 pid) internal view returns (bool) {
-        for (uint8 i = 0; i < community.length; i++) {
-            if (_getWefundVoteIndex(pid, community[i]) == type(uint8).max) {
-                return false;
-            }
-        }
+        for (uint8 i = 0; i < community.length; i++)
+            if (_getWefundVoteIndex(pid, community[i]) == type(uint8).max) return false;
         return true;
     }
 
