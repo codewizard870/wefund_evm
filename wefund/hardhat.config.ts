@@ -32,11 +32,31 @@ const config: HardhatUserConfig = {
     // mainnet: bscMainnet,
   },
   solidity: {
-    version: "0.8.4",
+    compilers: [
+      {
+        version: "0.8.9",
+      },
+      {
+        version: "0.8.4",
+      },
+      {
+        version: "0.8.2",
+      },
+      {
+        version: "0.8.0",
+      },
+      {
+        version: "0.6.2",
+      },
+      {
+        version: "0.6.0",
+      },
+    ],
+    // version: "0.8.4",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200
+        runs: 9999,
       },
     },
   },

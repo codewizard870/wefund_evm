@@ -38,9 +38,9 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     amount: 20_000_000,
     status: "",
   };
-  const back1 = 30_000_000;
-  const back2 = 70_000_000;
-  const back3 = 10_000_000;
+  const backedUSDC = 30_000_000;
+  const backedUSDT = 70_000_000;
+  const backedBUSD = 10_000_000;
 
   before(async () => {
     // Deploy MockCake
@@ -57,10 +57,15 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     mockUSDC.mintTokens(100_000_000_000, { from: erin });
     mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
 
-    mockUSDC.mintTokens(100_000_000_000, { from: operator });
-    mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: operator });
+    mockBUSD.mintTokens(100_000_000_000, { from: erin });
+    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
+
+    mockUSDT.mintTokens(100_000_000_000, { from: operator });
+    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: operator });
 
     mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
+    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
+    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
   });
 
   it("Community add and remove", async () => {
@@ -240,23 +245,23 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
 
   it("CrowdFunding", async () => {
-    result = await wefund.back("1", "0", back1, { from: erin });
+    result = await wefund.back("1", "0", backedUSDC, { from: erin });
     expectEvent(result, "Backed", {
       token: "0",
-      amount: back1.toString(),
+      amount: backedUSDC.toString(),
     });
 
-    result = await wefund.back("1", "0", back3, { from: erin });
+    result = await wefund.back("1", "2", backedBUSD, { from: erin });
     expectEvent(result, "Backed", {
-      token: "0",
-      amount: back3.toString(),
+      token: "2",
+      amount: backedBUSD.toString(),
     });
 
 
-    result = await wefund.back("1", "0", back2, { from: operator });
+    result = await wefund.back("1", "1", backedUSDT, { from: operator });
     expectEvent(result, "Backed", {
-      token: "0",
-      amount: back2.toString(),
+      token: "1",
+      amount: backedUSDT.toString(),
     });
     expectEvent(result, "ProjectStatusChanged", {
       status: "6",
@@ -315,6 +320,6 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     assert.equal(result, "2");
 
     result = await wefund.getProjectInfo();
-    assert.equal(result[0].backed, back1 + back2+back3);
+    assert.equal(result[0].backed, backedUSDC + backedUSDT + backedBUSD);
   });
 });
