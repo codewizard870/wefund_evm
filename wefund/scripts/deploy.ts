@@ -1,7 +1,7 @@
 import { ethers, network } from "hardhat";
 
 const currentNetwork = network.name;
-console.log(currentNetwork);
+console.log(network);
 
 const main = async () => {
   const WeFund = await ethers.getContractFactory("WeFund");

@@ -1,5 +1,6 @@
 WeFund Contract
 
-1. cd ./wefund
-2. yarn install
-3. yarn test:coverage
+1. yarn install
+2. cd ./wefund
+3. yarn install
+4. yarn test:coverage

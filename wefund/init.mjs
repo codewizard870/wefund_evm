@@ -27,18 +27,22 @@ const CHAINS_CONFIG = {
 const pk = process.env.PK;
 
 async function main() {
-  const WEFUND_CONTRACT = "0x5423E494C39583bC8b1E16Eab3347f69B95d7695";
+  const WEFUND_CONTRACT = "0xad1bF7a44DE64315cD4a59d03B9b73Ca50a4D08a";
   const provider = new ethers.providers.JsonRpcProvider(CHAINS_CONFIG.bst_testnet.rpc);
   if (!pk) return;
   const signer = new ethers.Wallet(pk, provider);
   const contract = new ethers.Contract(WEFUND_CONTRACT, WEFUND_ABI.abi, signer);
 
   let res;
+  // const USDC = 0xFE724a829fdF12F7012365dB98730EEe33742ea2;
+  // const USDT = 0x6EE856Ae55B6E1A249f04cd3b947141bc146273c;
+  // const BUSD = 0x16c550a97Ad2ae12C0C8CF1CC3f8DB4e0c45238f;
+
   //bsc testnet
-  // address constant USDC = 0x64544969ed7EBf5f083679233325356EbE738930;
-  // address constant USDT = 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd;
-  // address constant BUSD = 0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee;
-  // address constant WEFUND_WALLET = 0x0dC488021475739820271D595a624892264Ca641;
+  const USDC = "0x64544969ed7EBf5f083679233325356EbE738930";
+  const USDT = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd";
+  const BUSD = "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee";
+  const WEFUND_WALLET = "0x0dC488021475739820271D595a624892264Ca641";
 
   //bsc mainnet
   // address constant USDC = 0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d;
@@ -46,9 +50,15 @@ async function main() {
   // address constant BUSD = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
 
   res = await contract.setTokenAddress(
-    "0x64544969ed7EBf5f083679233325356EbE738930",
-    "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd",
-    "0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee"
+    USDC,
+    USDT,
+    BUSD
+  );
+  console.log(res);
+  await res.wait();
+
+  res = await contract.setWefundwallet(
+    WEFUND_WALLET
   );
   console.log(res);
   await res.wait();

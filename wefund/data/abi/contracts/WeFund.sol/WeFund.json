@@ -416,19 +416,6 @@
   {
     "inputs": [
       {
-        "internalType": "bytes32",
-        "name": "c__0x4ed6348e",
-        "type": "bytes32"
-      }
-    ],
-    "name": "c_0x4ed6348e",
-    "outputs": [],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "pid",
         "type": "uint256"

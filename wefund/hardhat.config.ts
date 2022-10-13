@@ -26,45 +26,18 @@ const config: HardhatUserConfig = {
     hardhat: {
       gas: 120000000,
       blockGasLimit: 0x1fffffffffffff,
-      allowUnlimitedContractSize : true
+      allowUnlimitedContractSize: true,
     },
     testnet: bscTestnet,
-    // mainnet: bscMainnet,
+    mainnet: bscMainnet,
   },
   solidity: {
-    // compilers: [
-    //   {
-    //     version: '0.8.9',
-    //   },
-    //   {
-    //     version: '0.8.4',
-    //   },
-    //   {
-    //     version: '0.8.2',
-    //   },
-    //   {
-    //     version: '0.8.0',
-    //   },
-    //   {
-    //     version: '0.6.2',
-    //   },
-    //   {
-    //     version: '0.6.0',
-    //   },
-    // ],
     version: "0.8.4",
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
-        // details: {
-        //   yul: true,
-        //   yulDetails: {
-        //     stackAllocation: true,
-        //     optimizerSteps: "dhfoDgvulfnTUtnIf"
-        //   }
-        // }
-      }
+        runs: 200
+      },
     },
   },
   paths: {
