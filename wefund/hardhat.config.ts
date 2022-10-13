@@ -8,17 +8,17 @@ import "hardhat-contract-sizer";
 import "solidity-coverage";
 import "dotenv/config";
 
-const bscTestnet: NetworkUserConfig = {
-  url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
-  chainId: 97,
-  accounts: [process.env.PK!],
-};
+// const bscTestnet: NetworkUserConfig = {
+//   url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
+//   chainId: 97,
+//   accounts: [process.env.PK!],
+// };
 
-const bscMainnet: NetworkUserConfig = {
-  url: "https://bsc-dataseed.binance.org/",
-  chainId: 56,
-  accounts: [process.env.PK!],
-};
+// const bscMainnet: NetworkUserConfig = {
+//   url: "https://bsc-dataseed.binance.org/",
+//   chainId: 56,
+//   accounts: [process.env.PK!],
+// };
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -28,8 +28,8 @@ const config: HardhatUserConfig = {
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
     },
-    testnet: bscTestnet,
-    mainnet: bscMainnet,
+    // testnet: bscTestnet,
+    // mainnet: bscMainnet,
   },
   solidity: {
     version: "0.8.4",
