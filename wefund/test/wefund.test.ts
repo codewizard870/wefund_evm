@@ -43,7 +43,6 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   const backedBUSD = 10_000_000;
 
   before(async () => {
-    // Deploy MockCake
     mockUSDC = await MockERC20.new("USDC", "USDC", _totalInitSupply);
     mockUSDT = await MockERC20.new("USDT", "USDT", _totalInitSupply);
     mockBUSD = await MockERC20.new("BUSD", "BUSD", _totalInitSupply);
@@ -51,19 +50,6 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     wefund = await WeFund.new({ from: alice });
 
     await wefund.setAddress(mockUSDC.address, mockUSDT.address, mockBUSD.address, treasury);
-
-    mockUSDC.mintTokens(100_000_000_000, { from: erin });
-    mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
-
-    mockBUSD.mintTokens(100_000_000_000, { from: erin });
-    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
-
-    mockUSDT.mintTokens(100_000_000_000, { from: operator });
-    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: operator });
-
-    mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
-    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
-    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
   });
 
   it("Community add and remove", async () => {
@@ -77,7 +63,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
       length: "2",
     });
 
-    expectRevert(wefund.addCommunity(alice), "Already Registered");
+    await expectRevert(wefund.addCommunity(alice), "Already Registered");
 
     result = await wefund.addCommunity(carol);
     expectEvent(result, "CommunityAdded", {
@@ -107,7 +93,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
 
   it("Document Valuation Vote", async () => {
-    expectRevert(wefund.documentValuationVote("1", true, { from: carol }), "Only Wefund");
+    await expectRevert(wefund.documentValuationVote("1", true, { from: carol }), "Only Wefund");
 
     result = await wefund.documentValuationVote("1", true, { from: alice });
     expectEvent(result, "DocumentValuationVoted", {
@@ -124,7 +110,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
       status: "1",
     });
 
-    expectRevert(wefund.documentValuationVote("1", true, { from: bob }), "Invalid Project Status");
+    await expectRevert(wefund.documentValuationVote("1", true, { from: bob }), "Invalid Project Status");
   });
 
   it("Intro Call Vote", async () => {
@@ -162,7 +148,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
 
   it("Add Incubation Goal from Project Owner", async () => {
-    expectRevert(wefund.addIncubationGoal("1", { goal: "GOAL 1" }, { from: alice }), "Only Project Owner");
+    await expectRevert(wefund.addIncubationGoal("1", { goal: "GOAL 1" }, { from: alice }), "Only Project Owner");
 
     result = await wefund.addIncubationGoal("1", { goal: "GOAL 1" }, { from: carol });
     expectEvent(result, "IncubationGoalAdded", {
@@ -206,7 +192,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
 
   it("Add Milestones from Project Owner", async () => {
-    expectRevert(wefund.addMilestone("1", milestone, { from: alice }), "Only Project Owner");
+    await expectRevert(wefund.addMilestone("1", milestone, { from: alice }), "Only Project Owner");
 
     result = await wefund.addMilestone("1", milestone, { from: carol });
     expectEvent(result, "MilestoneAdded", {
@@ -250,6 +236,19 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
 
   it("CrowdFunding", async () => {
+    mockUSDC.mintTokens(100_000_000_000, { from: erin });
+    mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
+
+    mockBUSD.mintTokens(100_000_000_000, { from: erin });
+    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
+
+    mockUSDT.mintTokens(100_000_000_000, { from: operator });
+    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: operator });
+
+    mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
+    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
+    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
+
     result = await wefund.back("1", "0", backedUSDC, { from: erin });
     expectEvent(result, "Backed", {
       token: "0",
@@ -273,7 +272,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
 
   it("Milestone 1 Release Vote", async () => {
-    expectRevert(wefund.milestoneReleaseVote("1", true, {from: bob}), "Only Backer");
+    await expectRevert(wefund.milestoneReleaseVote("1", true, { from: bob }), "Only Backer");
 
     result = await wefund.milestoneReleaseVote("1", true, { from: erin });
     expectEvent(result, "MilestoneReleaseVoted", {
