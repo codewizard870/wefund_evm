@@ -1,8 +1,12 @@
 {
   "name": "wefund-contracts",
   "version": "1.0.0",
-  "description": "wefund contracts",
+  "description": "WeFund contracts",
   "private": true,
+  "workspaces": [
+    "projects/**"
+  ],
+  "repository": "https://github.com/alenzer/wefund_evm",
   "author": "James",
   "license": "MIT",
   "scripts": {
@@ -18,6 +22,8 @@
     "@nomiclabs/hardhat-truffle5": "^2.0.0",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@openzeppelin/test-helpers": "^0.5.11",
+    "@pancakeswap/eslint-config-pancake": "^1.2.0",
+    "@pancakeswap/pancake-swap-lib": "0.0.4",
     "@types/chai": "^4.2.21",
     "@types/mocha": "^8.2.2",
     "@types/node": "^14.14.35",
