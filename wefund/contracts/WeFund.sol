@@ -23,7 +23,7 @@ contract WeFund is Ownable {
     }
 
     struct IncubationGoalInfo {
-        string name;
+        string title;
         string description;
         string start_date;
         string end_date;
@@ -155,6 +155,10 @@ contract WeFund is Ownable {
         project_id++;
 
         emit ProjectAdded(project_id);
+    }
+
+    function removeProject(uint256 _pid) public onlyOwner{
+        delete projects[_pid];
     }
 
     function _getWefundWalletIndex(address _addr) internal view returns (uint8) {

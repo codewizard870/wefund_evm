@@ -147,15 +147,27 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     });
   });
 
+  const goal1 = {
+    title: "goal 1",
+    description: "goal 1",
+    start_date:"2022-1-1",
+    end_date:"2022-12-31"
+  }
+  const goal2 = {
+    title: "goal 2",
+    description: "goal 2",
+    start_date:"2022-1-1",
+    end_date:"2022-12-31"
+  }
   it("Add Incubation Goal from Project Owner", async () => {
-    await expectRevert(wefund.addIncubationGoal("1", { goal: "GOAL 1" }, { from: alice }), "Only Project Owner");
+    await expectRevert(wefund.addIncubationGoal("1", goal1, { from: alice }), "Only Project Owner");
 
-    result = await wefund.addIncubationGoal("1", { goal: "GOAL 1" }, { from: carol });
+    result = await wefund.addIncubationGoal("1", goal1, { from: carol });
     expectEvent(result, "IncubationGoalAdded", {
       length: "1",
     });
 
-    result = await wefund.addIncubationGoal("1", { goal: "GOAL 2" }, { from: carol });
+    result = await wefund.addIncubationGoal("1", goal2, { from: carol });
     expectEvent(result, "IncubationGoalAdded", {
       length: "2",
     });
