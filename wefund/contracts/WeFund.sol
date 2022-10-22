@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract WeFund is Ownable {
@@ -23,7 +23,10 @@ contract WeFund is Ownable {
     }
 
     struct IncubationGoalInfo {
-        string goal;
+        string name;
+        string description;
+        string start_date;
+        string end_date;
     }
 
     struct BackerInfo {
@@ -40,7 +43,11 @@ contract WeFund is Ownable {
         string start_date;
         string end_date;
         uint256 amount;
-        string status;
+    }
+
+    struct Vote {
+        address addr;
+        bool vote;
     }
 
     struct ProjectInfo {
@@ -51,11 +58,12 @@ contract WeFund is Ownable {
         ProjectStatus status;
         IncubationGoalInfo[] incubationGoals;
         uint256 incubationGoalVoteIndex;
-        address[] wefundVotes;
+        Vote[] wefundVotes;
         BackerInfo[] backers;
         MilestoneInfo[] milestones;
-        address[] backerVotes;
+        Vote[] backerVotes;
         uint256 milestoneVotesIndex;
+        bool rejected;
     }
 
     event CommunityAdded(uint256 length);
@@ -83,6 +91,7 @@ contract WeFund is Ownable {
     mapping(uint256 => ProjectInfo) private projects;
     uint256 private project_id;
     address[] private community;
+    uint256 private wefund_id;
 
     constructor() {
         project_id = 1;
@@ -98,6 +107,10 @@ contract WeFund is Ownable {
         USDT = _usdt;
         BUSD = _busd;
         WEFUND_WALLET = _wefund;
+    }
+
+    function setWefundID(uint256 _pid) public onlyOwner {
+        wefund_id = _pid;
     }
 
     function addCommunity(address _addr) public onlyOwner {
@@ -155,7 +168,7 @@ contract WeFund is Ownable {
 
     function _getWefundVoteIndex(uint256 pid, address _addr) internal view returns (uint8) {
         for (uint8 i = 0; i < projects[pid].wefundVotes.length; i++) {
-            if (projects[pid].wefundVotes[i] == _addr) {
+            if (projects[pid].wefundVotes[i].addr == _addr) {
                 return i;
             }
         }
@@ -179,23 +192,24 @@ contract WeFund is Ownable {
 
         ProjectInfo storage project = projects[pid];
         uint8 index = _getWefundVoteIndex(pid, msg.sender);
-        if (index != type(uint8).max) {
-            if (vote == false) {
-                uint256 length = project.wefundVotes.length;
-                project.wefundVotes[index] = project.wefundVotes[length - 1];
-                project.wefundVotes.pop();
-            }
-        } else {
-            if (vote == true) {
-                project.wefundVotes.push(msg.sender);
-            }
-        }
+        if (index != type(uint8).max) project.wefundVotes[index].vote = vote;
+        else project.wefundVotes.push(Vote({addr: msg.sender, vote: vote}));
     }
 
-    function _isWefundAllVoted(uint256 pid) internal view returns (bool) {
-        for (uint8 i = 0; i < community.length; i++)
-            if (_getWefundVoteIndex(pid, community[i]) == type(uint8).max) return false;
-        return true;
+    function _isWefundAllVoted(uint256 pid) internal returns (bool) {
+        ProjectInfo storage project = projects[pid];
+        if (community.length <= project.wefundVotes.length) {
+            for (uint8 i = 0; i < community.length; i++) {
+                uint8 index = _getWefundVoteIndex(pid, community[i]);
+                if (project.wefundVotes[index].vote == false) {
+                    project.rejected = true;
+                    return false;
+                }
+            }
+            project.rejected = false;
+            return true;
+        }
+        return false;
     }
 
     function documentValuationVote(uint256 pid, bool vote) public {
@@ -292,26 +306,25 @@ contract WeFund is Ownable {
 
         address sender = msg.sender;
 
-        IERC20 token;
+        ERC20 token;
         uint256 a_usdc = 0;
         uint256 a_usdt = 0;
         uint256 a_busd = 0;
 
         if (token_type == TokenType.USDC) {
-            token = IERC20(USDC);
-            a_usdc = amount;
+            token = ERC20(USDC);
+            a_usdc = amount / 10**token.decimals();
         } else if (token_type == TokenType.USDT) {
-            token = IERC20(USDT);
-            a_usdt = amount;
+            token = ERC20(USDT);
+            a_usdt = amount / 10**token.decimals();
         } else {
-            token = IERC20(BUSD);
-            a_busd = amount;
+            token = ERC20(BUSD);
+            a_busd = amount / 10**token.decimals();
         }
-
-        token.transferFrom(sender, WEFUND_WALLET, amount);
+        if (project_id != wefund_id) token.transferFrom(sender, WEFUND_WALLET, amount);
 
         ProjectInfo storage project = projects[pid];
-        project.backed += amount;
+        project.backed += a_usdc + a_usdt + a_busd;
 
         bool b_exist = false;
         for (uint256 i = 0; i < project.backers.length; i++) {
@@ -349,7 +362,7 @@ contract WeFund is Ownable {
     function _getBackerVoteIndex(uint256 pid, address _addr) internal view returns (uint8) {
         ProjectInfo memory project = projects[pid];
         for (uint8 i = 0; i < project.backerVotes.length; i++) {
-            if (project.backerVotes[i] == _addr) {
+            if (project.backerVotes[i].addr == _addr) {
                 return i;
             }
         }
@@ -364,28 +377,24 @@ contract WeFund is Ownable {
     function _backerVote(uint256 pid, bool vote) internal {
         ProjectInfo storage project = projects[pid];
         uint8 index = _getBackerVoteIndex(pid, msg.sender);
-        if (index != type(uint8).max) {
-            //already voted
-            if (vote == false) {
-                uint256 length = project.backerVotes.length;
-                project.backerVotes[index] = project.backerVotes[length - 1];
-                project.backerVotes.pop();
-            }
-        } else {
-            if (vote == true) {
-                project.backerVotes.push(msg.sender);
-            }
-        }
+        if (index != type(uint8).max) project.backerVotes[index].vote = vote;
+        else project.backerVotes.push(Vote({addr: msg.sender, vote: vote}));
     }
 
-    function _isBackerAllVoted(uint256 pid) internal view returns (bool) {
-        ProjectInfo memory project = projects[pid];
-        for (uint8 i = 0; i < project.backers.length; i++) {
-            if (_getBackerVoteIndex(pid, project.backers[i].addr) == type(uint8).max) {
-                return false;
+    function _isBackerAllVoted(uint256 pid) internal returns (bool) {
+        ProjectInfo storage project = projects[pid];
+        if (project.backers.length <= project.backerVotes.length) {
+            for (uint8 i = 0; i < project.backers.length; i++) {
+                uint8 index = _getBackerVoteIndex(pid, project.backers[i].addr);
+                if (project.backerVotes[index].vote == false) {
+                    project.rejected = true;
+                    return false;
+                }
             }
+            project.rejected = false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     function milestoneReleaseVote(uint256 pid, bool vote) public onlyBacker(pid) {
@@ -395,13 +404,13 @@ contract WeFund is Ownable {
             ProjectInfo storage project = projects[pid];
             delete project.backerVotes;
             if (project.milestoneVotesIndex < project.milestones.length - 1) {
-                IERC20 token;
-                token = IERC20(USDC);
+                ERC20 token;
+                token = ERC20(USDC);
 
                 token.transferFrom(
                     WEFUND_WALLET,
                     project.owner,
-                    project.milestones[project.milestoneVotesIndex].amount
+                    project.milestones[project.milestoneVotesIndex].amount * 10**token.decimals()
                 );
 
                 project.milestoneVotesIndex++;

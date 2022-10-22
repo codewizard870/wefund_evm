@@ -1,4 +1,4 @@
-import { parseEther } from "ethers/lib/utils";
+import { formatEther, parseEther } from "ethers/lib/utils";
 import { artifacts, contract } from "hardhat";
 import { assert, expect } from "chai";
 import { BN, constants, expectEvent, expectRevert, time } from "@openzeppelin/test-helpers";
@@ -38,9 +38,9 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     amount: 20_000_000,
     status: "",
   };
-  const backedUSDC = 30_000_000;
-  const backedUSDT = 70_000_000;
-  const backedBUSD = 10_000_000;
+  const backedUSDC = parseEther("30000000");
+  const backedUSDT = parseEther("70000000");
+  const backedBUSD = parseEther("10000000");
 
   before(async () => {
     mockUSDC = await MockERC20.new("USDC", "USDC", _totalInitSupply);
@@ -48,8 +48,8 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     mockBUSD = await MockERC20.new("BUSD", "BUSD", _totalInitSupply);
 
     wefund = await WeFund.new({ from: alice });
-
     await wefund.setAddress(mockUSDC.address, mockUSDT.address, mockBUSD.address, treasury);
+    await wefund.setWefundID(0);
   });
 
   it("Community add and remove", async () => {
@@ -236,19 +236,20 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   });
 
   it("CrowdFunding", async () => {
-    mockUSDC.mintTokens(100_000_000_000, { from: erin });
-    mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
+    mockUSDC.mintTokens(parseEther("100000000000"), { from: erin });
+    mockUSDC.increaseAllowance(wefund.address, parseEther("100000000000"), { from: erin });
 
-    mockBUSD.mintTokens(100_000_000_000, { from: erin });
-    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: erin });
+    mockBUSD.mintTokens(parseEther("100000000000"), { from: erin });
+    mockBUSD.increaseAllowance(wefund.address, parseEther("100000000000"), { from: erin });
 
-    mockUSDT.mintTokens(100_000_000_000, { from: operator });
-    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: operator });
+    mockUSDT.mintTokens(parseEther("100000000000"), { from: operator });
+    mockUSDT.increaseAllowance(wefund.address, parseEther("100000000000"), { from: operator });
 
-    mockUSDC.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
-    mockUSDT.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
-    mockBUSD.increaseAllowance(wefund.address, 100_000_000_000, { from: treasury });
+    mockUSDC.increaseAllowance(wefund.address, parseEther("100000000000"), { from: treasury });
+    mockUSDT.increaseAllowance(wefund.address, parseEther("100000000000"), { from: treasury });
+    mockBUSD.increaseAllowance(wefund.address, parseEther("100000000000"), { from: treasury });
 
+    
     result = await wefund.back("1", "0", backedUSDC, { from: erin });
     expectEvent(result, "Backed", {
       token: "0",
@@ -274,22 +275,17 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
   it("Milestone 1 Release Vote", async () => {
     await expectRevert(wefund.milestoneReleaseVote("1", true, { from: bob }), "Only Backer");
 
-    result = await wefund.milestoneReleaseVote("1", true, { from: erin });
-    expectEvent(result, "MilestoneReleaseVoted", {
-      voted: true,
-    });
-
     result = await wefund.milestoneReleaseVote("1", false, { from: erin });
     expectEvent(result, "MilestoneReleaseVoted", {
       voted: false,
     });
 
-    result = await wefund.milestoneReleaseVote("1", true, { from: erin });
+    result = await wefund.milestoneReleaseVote("1", true, { from: operator });
     expectEvent(result, "MilestoneReleaseVoted", {
       voted: true,
     });
 
-    result = await wefund.milestoneReleaseVote("1", true, { from: operator });
+    result = await wefund.milestoneReleaseVote("1", true, { from: erin });
     expectEvent(result, "MilestoneReleaseVoted", {
       voted: true,
     });
@@ -323,6 +319,7 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     assert.equal(result, "3");
 
     result = await wefund.getProjectInfo();
-    assert.equal(result[0].backed, backedUSDC + backedUSDT + backedBUSD);
+    const amount = backedUSDC.add(backedUSDT.add(backedBUSD));
+    assert.equal(parseFloat(result[0].backed), parseFloat(formatEther(amount)));
   });
 });
