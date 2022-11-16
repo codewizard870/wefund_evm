@@ -9,12 +9,18 @@
     "compile": "npx hardhat compile",
     "deploy:testnet": "npx hardhat run --network testnet scripts/deploy.ts",
     "deploy:mainnet": "npx hardhat run --network mainnet scripts/deploy.ts",
+    "deploy:sapphire": "npx hardhat run --network sapphire scripts/deploy.ts",
     "test": "npx hardhat test",
     "test:coverage": "npx hardhat coverage",
-    "test:size-contracts": "npx hardhat size-contracts"
+    "test:size-contracts": "npx hardhat size-contracts",
+    "build-contracts": "sol-merger \"./contracts/*.sol\" ./build"
   },
   "devDependencies": {
     "@chainlink/contracts": "0.1.7",
+    "@oasisprotocol/sapphire-paratime": "workspace:^",
     "@openzeppelin/contracts": "^4.2.0"
+  },
+  "dependencies": {
+    "sol-merger": "^4.1.1"
   }
 }

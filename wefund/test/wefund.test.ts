@@ -262,19 +262,19 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     mockBUSD.increaseAllowance(wefund.address, parseEther("100000000000"), { from: treasury });
 
     
-    result = await wefund.back("1", "0", backedUSDC, { from: erin });
+    result = await wefund.back("1", "0", backedUSDC, "1", { from: erin });
     expectEvent(result, "Backed", {
       token: "0",
       amount: backedUSDC.toString(),
     });
 
-    result = await wefund.back("1", "2", backedBUSD, { from: erin });
+    result = await wefund.back("1", "2", backedBUSD, "1", { from: erin });
     expectEvent(result, "Backed", {
       token: "2",
       amount: backedBUSD.toString(),
     });
 
-    result = await wefund.back("1", "1", backedUSDT, { from: operator });
+    result = await wefund.back("1", "1", backedUSDT, "1", { from: operator });
     expectEvent(result, "Backed", {
       token: "1",
       amount: backedUSDT.toString(),

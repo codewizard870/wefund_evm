@@ -27,6 +27,7 @@ contract WeFund is Ownable {
         string description;
         string start_date;
         string end_date;
+        uint256 approved_date;
     }
 
     struct BackerInfo {
@@ -34,6 +35,7 @@ contract WeFund is Ownable {
         uint256 usdc_amount;
         uint256 usdt_amount;
         uint256 busd_amount;
+        uint256 wfd_amount;
     }
 
     struct MilestoneInfo {
@@ -74,9 +76,11 @@ contract WeFund is Ownable {
     event IntroCallVoted(bool voted);
     event IncubationGoalSetupVoted(bool voted);
     event IncubationGoalAdded(uint256 length);
+    event IncubationGoalRemoved(uint256 length, uint256 index);
     event IncubationGoalVoted(bool voted);
     event NextIncubationGoalVoting(uint256 index);
     event MilestoneAdded(uint256 length);
+    event MilestoneRemoved(uint256 length, uint256 index);
     event MilestoneSetupVoted(bool voted);
     event NextMilestoneSetupVoting(uint256 index);
     event Backed(TokenType token, uint256 amount);
@@ -157,7 +161,7 @@ contract WeFund is Ownable {
         emit ProjectAdded(project_id);
     }
 
-    function removeProject(uint256 _pid) public onlyOwner{
+    function removeProject(uint256 _pid) public onlyOwner {
         delete projects[_pid];
     }
 
@@ -259,12 +263,24 @@ contract WeFund is Ownable {
         emit IncubationGoalAdded(project.incubationGoals.length);
     }
 
+    function removeIncubationGoal(uint256 pid, uint256 _index) public {
+        _onlyProjectOwner(pid);
+        ProjectInfo storage project = projects[pid];
+        for (uint256 i = _index; i < project.incubationGoals.length - 1; i++) {
+            project.incubationGoals[i] = project.incubationGoals[i + 1];
+        }
+        project.incubationGoals.pop();
+        emit IncubationGoalRemoved(project.incubationGoals.length, _index);
+    }
+
     function incubationGoalVote(uint256 pid, bool vote) public {
         _checkStatus(pid, ProjectStatus.IncubationGoal);
         _wefundVote(pid, vote);
         if (_isWefundAllVoted(pid) == true) {
             ProjectInfo storage project = projects[pid];
             delete project.wefundVotes;
+            project.incubationGoals[project.incubationGoalVoteIndex].approved_date = block.timestamp;
+
             if (project.incubationGoalVoteIndex < project.incubationGoals.length - 1) {
                 project.incubationGoalVoteIndex++;
                 emit NextIncubationGoalVoting(project.incubationGoalVoteIndex);
@@ -281,6 +297,16 @@ contract WeFund is Ownable {
         ProjectInfo storage project = projects[pid];
         project.milestones.push(_info);
         emit MilestoneAdded(project.milestones.length);
+    }
+
+    function removeMilestone(uint256 pid, uint256 _index) public {
+        _onlyProjectOwner(pid);
+        ProjectInfo storage project = projects[pid];
+        for (uint256 i = _index; i < project.milestones.length - 1; i++) {
+            project.milestones[i] = project.milestones[i + 1];
+        }
+        project.milestones.pop();
+        emit MilestoneRemoved(project.incubationGoals.length, _index);
     }
 
     function milestoneSetupVote(uint256 pid, bool vote) public {
@@ -304,7 +330,8 @@ contract WeFund is Ownable {
     function back(
         uint256 pid,
         TokenType token_type,
-        uint256 amount
+        uint256 amount,
+        uint256 wfd_amount
     ) public {
         _checkStatus(pid, ProjectStatus.CrowdFundraising);
 
@@ -325,7 +352,7 @@ contract WeFund is Ownable {
             token = ERC20(BUSD);
             a_busd = amount / 10**token.decimals();
         }
-        if (project_id != wefund_id) token.transferFrom(sender, WEFUND_WALLET, amount);
+        token.transferFrom(sender, WEFUND_WALLET, amount);
 
         ProjectInfo storage project = projects[pid];
         project.backed += a_usdc + a_usdt + a_busd;
@@ -336,13 +363,20 @@ contract WeFund is Ownable {
                 project.backers[i].usdc_amount += a_usdc;
                 project.backers[i].usdt_amount += a_usdt;
                 project.backers[i].busd_amount += a_busd;
+                project.backers[i].wfd_amount += wfd_amount;
                 b_exist = true;
                 break;
             }
         }
         if (!b_exist) {
             project.backers.push(
-                BackerInfo({addr: sender, usdc_amount: a_usdc, usdt_amount: a_usdt, busd_amount: a_busd})
+                BackerInfo({
+                    addr: sender,
+                    usdc_amount: a_usdc,
+                    usdt_amount: a_usdt,
+                    busd_amount: a_busd,
+                    wfd_amount: wfd_amount
+                })
             );
         }
         if (project.backed >= project.collected) {

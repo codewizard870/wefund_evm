@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { HardhatUserConfig, NetworkUserConfig } from "hardhat/types";
+import '@oasisprotocol/sapphire-hardhat';
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-truffle5";
@@ -20,6 +21,12 @@ const bscMainnet: NetworkUserConfig = {
   accounts: [process.env.PK!],
 };
 
+const sapphireTestnet: NetworkUserConfig = {
+  url: "https://testnet.sapphire.oasis.dev",
+  chainId: 23295,
+  accounts: [process.env.PK!],
+};
+
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
   networks: {
@@ -30,34 +37,25 @@ const config: HardhatUserConfig = {
     },
     testnet: bscTestnet,
     mainnet: bscMainnet,
+    sapphire: sapphireTestnet,
   },
   solidity: {
-    // compilers: [
-    //   {
-    //     version: "0.8.9",
-    //   },
-    //   {
-    //     version: "0.8.4",
-    //   },
-    //   {
-    //     version: "0.8.2",
-    //   },
-    //   {
-    //     version: "0.8.0",
-    //   },
-    //   {
-    //     version: "0.6.2",
-    //   },
-    //   {
-    //     version: "0.6.0",
-    //   },
-    // ],
     version: "0.8.4",
     settings: {
       optimizer: {
         enabled: true,
         runs: 9999,
       },
+      outputSelection: {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "metadata",
+          ]
+        },
+      }
     },
   },
   paths: {
