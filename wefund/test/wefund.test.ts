@@ -90,6 +90,11 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     expectEvent(result, "ProjectAdded", {
       pid: "4",
     });
+
+    result = await wefund.removeProject("4");
+    expectEvent(result, "ProjectRemoved", {
+      pid: "4"
+    })
   });
 
   it("Document Valuation Vote", async () => {
@@ -151,13 +156,15 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     title: "goal 1",
     description: "goal 1",
     start_date:"2022-1-1",
-    end_date:"2022-12-31"
+    end_date:"2022-12-31",
+    approved_date: 0,
   }
   const goal2 = {
     title: "goal 2",
     description: "goal 2",
     start_date:"2022-1-1",
-    end_date:"2022-12-31"
+    end_date:"2022-12-31",
+    approved_date: 0,
   }
   it("Add Incubation Goal from Project Owner", async () => {
     await expectRevert(wefund.addIncubationGoal("1", goal1, { from: alice }), "Only Project Owner");
@@ -165,6 +172,17 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     result = await wefund.addIncubationGoal("1", goal1, { from: carol });
     expectEvent(result, "IncubationGoalAdded", {
       length: "1",
+    });
+
+    result = await wefund.addIncubationGoal("1", goal2, { from: carol });
+    expectEvent(result, "IncubationGoalAdded", {
+      length: "2",
+    });
+
+    result = await wefund.removeIncubationGoal("1", "0", { from: carol });
+    expectEvent(result, "IncubationGoalRemoved", {
+      length: "1",
+      index: "0"
     });
 
     result = await wefund.addIncubationGoal("1", goal2, { from: carol });
@@ -209,6 +227,17 @@ contract("WeFund", ([alice, bob, carol, david, erin, operator, treasury, injecto
     result = await wefund.addMilestone("1", milestone, { from: carol });
     expectEvent(result, "MilestoneAdded", {
       length: "1",
+    });
+
+    result = await wefund.addMilestone("1", milestone, { from: carol });
+    expectEvent(result, "MilestoneAdded", {
+      length: "2",
+    });
+
+    result = await wefund.removeMilestone("1", "0", {from: carol});
+    expectEvent(result, "MilestoneRemoved", {
+      length: "1",
+      index: "0",
     });
 
     result = await wefund.addMilestone("1", milestone, { from: carol });

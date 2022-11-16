@@ -71,6 +71,7 @@ contract WeFund is Ownable {
     event CommunityAdded(uint256 length);
     event CommunityRemoved(uint256 length);
     event ProjectAdded(uint256 pid);
+    event ProjectRemoved(uint256 pid);
     event DocumentValuationVoted(bool voted);
     event ProjectStatusChanged(ProjectStatus status);
     event IntroCallVoted(bool voted);
@@ -163,6 +164,8 @@ contract WeFund is Ownable {
 
     function removeProject(uint256 _pid) public onlyOwner {
         delete projects[_pid];
+
+        emit ProjectRemoved(project_id);
     }
 
     function _getWefundWalletIndex(address _addr) internal view returns (uint8) {
@@ -306,7 +309,7 @@ contract WeFund is Ownable {
             project.milestones[i] = project.milestones[i + 1];
         }
         project.milestones.pop();
-        emit MilestoneRemoved(project.incubationGoals.length, _index);
+        emit MilestoneRemoved(project.milestones.length, _index);
     }
 
     function milestoneSetupVote(uint256 pid, bool vote) public {

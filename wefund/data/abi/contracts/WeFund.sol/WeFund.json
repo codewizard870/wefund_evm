@@ -267,6 +267,19 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "pid",
+        "type": "uint256"
+      }
+    ],
+    "name": "ProjectRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "enum WeFund.ProjectStatus",
         "name": "status",
         "type": "uint8"
@@ -501,6 +514,19 @@
     "name": "back",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "c__0x4ed6348e",
+        "type": "bytes32"
+      }
+    ],
+    "name": "c_0x4ed6348e",
+    "outputs": [],
+    "stateMutability": "pure",
     "type": "function"
   },
   {
