@@ -4,7 +4,7 @@ const currentNetwork = network.name;
 console.log(currentNetwork);
 
 const main = async () => {
-  const WeFund = await ethers.getContractFactory("WeFund2");
+  const WeFund = await ethers.getContractFactory("WeFund");
 
   const wefund = await WeFund.deploy();
 
