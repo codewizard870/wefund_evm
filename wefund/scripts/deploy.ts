@@ -5,9 +5,7 @@ console.log(currentNetwork);
 
 const main = async () => {
   const WeFund = await ethers.getContractFactory("WeFund");
-
   const wefund = await WeFund.deploy();
-
   await wefund.deployed();
   console.log("WeFund deployed to:", wefund.address);
 };

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { HardhatUserConfig, NetworkUserConfig } from "hardhat/types";
-import '@oasisprotocol/sapphire-hardhat';
+// import "@oasisprotocol/sapphire-hardhat";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-web3";
 import "@nomiclabs/hardhat-truffle5";
@@ -8,6 +8,8 @@ import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "solidity-coverage";
 import "dotenv/config";
+
+import "@nomiclabs/hardhat-etherscan";
 
 const bscTestnet: NetworkUserConfig = {
   url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
@@ -48,14 +50,9 @@ const config: HardhatUserConfig = {
       },
       outputSelection: {
         "*": {
-          "*": [
-            "abi",
-            "evm.bytecode",
-            "evm.deployedBytecode",
-            "metadata",
-          ]
+          "*": ["abi", "evm.bytecode", "evm.deployedBytecode", "metadata"],
         },
-      }
+      },
     },
   },
   paths: {
@@ -68,6 +65,9 @@ const config: HardhatUserConfig = {
     path: "./data/abi",
     clear: true,
     flat: false,
+  },
+  etherscan: {
+    apiKey: "QR2YIYFA919M449I4W9R31Z28TXN79IEQP",
   },
 };
 
