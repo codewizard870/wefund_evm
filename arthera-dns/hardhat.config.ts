@@ -11,29 +11,11 @@ import "dotenv/config";
 
 import "@nomiclabs/hardhat-etherscan";
 
-const bscTestnet: NetworkUserConfig = {
-  url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
-  chainId: 97,
+const arthera: NetworkUserConfig = {
+  url: "https://rpc-test.arthera.net",
+  chainId: 10243,
   accounts: [process.env.PK!],
 };
-
-const bscMainnet: NetworkUserConfig = {
-  url: "https://bsc-dataseed.binance.org/",
-  chainId: 56,
-  accounts: [process.env.PK!],
-};
-
-const sapphireTestnet: NetworkUserConfig = {
-  url: "https://testnet.sapphire.oasis.dev",
-  chainId: 23295,
-  accounts: [process.env.PK!],
-};
-
-const emeraldMainnet: NetworkUserConfig = {
-  url: "https://emerald.oasis.dev",
-  chainId: 42262,
-  accounts: [process.env.PK!],
-}
 
 const config: HardhatUserConfig = {
   defaultNetwork: "hardhat",
@@ -43,13 +25,10 @@ const config: HardhatUserConfig = {
       blockGasLimit: 0x1fffffffffffff,
       allowUnlimitedContractSize: true,
     },
-    testnet: bscTestnet,
-    mainnet: bscMainnet,
-    sapphire: sapphireTestnet,
-    emerald: emeraldMainnet,
+    arthera
   },
   solidity: {
-    version: "0.8.4",
+    version: "0.8.1",
     settings: {
       optimizer: {
         enabled: true,

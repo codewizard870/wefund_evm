@@ -7,10 +7,7 @@
   "private": true,
   "scripts": {
     "compile": "npx hardhat compile",
-    "deploy:testnet": "npx hardhat run --network testnet scripts/deploy.ts",
-    "deploy:mainnet": "npx hardhat run --network mainnet scripts/deploy.ts",
-    "deploy:sapphire": "npx hardhat run --network sapphire scripts/deploy.ts",
-    "deploy:emerald": "npx hardhat run --network emerald scripts/deploy.ts",
+    "deploy:arthera": "npx hardhat run --network arthera scripts/deploy.ts",
     "test": "npx hardhat test",
     "test:coverage": "npx hardhat coverage",
     "test:size-contracts": "npx hardhat size-contracts",
