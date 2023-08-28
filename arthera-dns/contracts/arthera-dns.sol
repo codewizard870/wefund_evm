@@ -1140,7 +1140,7 @@ contract ArtheraDns is
     function getSubscriptionOwner() external view override returns (address) {
         // the owner of the subscription must be an EOA
         // Replace this with the account created in Step 1
-        return 0xFFfCd0B404c3d8AE38Ea2966bAD5A75D5Ab6ce0F;
+        return owner();
     }
 
     function supportsInterface(
